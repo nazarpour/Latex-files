@@ -1,0 +1,437 @@
+
+\documentclass{beamer}
+
+
+\mode<presentation>
+
+\usetheme{Boadilla}
+%\usetheme{AnnArbor}
+%\usetheme{Berkeley}
+%\usetheme{PaloAlto}
+
+
+
+
+\usepackage{mdframed}
+
+\usecolortheme{carl}
+\usepackage{flexisym}
+\usepackage{ccpres}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
+\usepackage{lxfonts}
+\usepackage{mathpartir}
+\input{macros}
+
+
+\title[Partial Semantics]{Global States in Partial Semantics}
+\author[H.~Nazarpour]{}
+\institute[Verimag]{}
+\date{\today}
+
+\begin{document}
+
+% Each slide goes in a frame environment.
+% The first one should be your title page, which is
+% set up automatically by Beamer.
+\begin{frame}
+  \titlepage
+
+  \begin{center}
+    Preliminary for runtime verification in partial semantics
+  \end{center}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+\frametitle{Composite Component in Global Semantics}
+
+\setbeamercovered{transparent}
+
+$B=\Gamma(B_1,...,B_n)$
+\begin{itemize}
+\small
+\item<2-> $B_i$ is a tuple $(P_i,L_i,$ $T_i,X_i,\{g_{i_\tau}\}_{\tau \in T_i}, \{f_{i_\tau}\}_{\tau \in T_i})$
+\begin{itemize}
+\scriptsize
+\item<3-> $(P_i,L_i,T_i)$ is an LTS over a set of ports $P_i$, control locations $L_i$ and set of transitions $T_i \subseteq L_i \times P_i \times L_i$ 
+\item<4-> $X_i$ is a set of variables.
+\end{itemize}
+
+
+\item<5-> Semantics of $B_i$ is an LTS $(Q_i,P_i,\rightarrow_i)$
+\begin{itemize}
+\scriptsize
+\item<6-> $Q_i=\{(l,v)\in L_i\times X_i \}$
+\item<7-> $\rightarrow_i= \{ ((l',v'),p,(l,v))\in Q_i\times P_i\times Q_i\mid \exists \tau\in T_i: g_{i_\tau}(v') \wedge v=f_{i_\tau}(v')\}$
+\end{itemize}
+
+\item<8-> $\Gamma$ is set of connectors\\
+A connector $\gamma$ is a tuple $({\cal P}_\gamma,G,F)$
+\begin{itemize}
+\scriptsize
+\item ${\cal P}_\gamma = \{p_i[x_i]\mid p_i\in B_i.P\}_{i \in I}$ such that $\forall i\in I: {\cal P}_\gamma \cap B_i.P = \{p_i\}$
+\item $G$ is a Boolean expression over the set of variables $\cup_{i\in I}\ x_i$ (the guard)
+\item $F$ is an update function defined over the set of variables $\cup_{i\in I}\ x_i$
+\item Interaction of $\gamma$ in denoted with ${\cal I}_\gamma$
+\end{itemize}
+\end{itemize}
+
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamercovered{transparent}
+\begin{frame}
+  \frametitle{Composite Component in Global Semantics}
+  \framesubtitle{Semantics}
+  \small
+ 
+ Semantics of $B$ is defined as a transition system $(Q,A,\goesto)$
+\begin{itemize}
+\footnotesize
+\item $Q= B_1.Q\times \ldots\times B_n.Q$ is the set of global state, $Init\in Q$ as the initial state
+\item $A = \cup_{\gamma \in \Gamma}\{{\cal I}_\gamma\}$ is the set of all possible interactions,
+\item $\goesto$ is the least set of transitions satisfying  rule:
+\begin{mathpar}
+\inferrule*
+{
+  \exists (a=\{p_i\}_{i\in I}) \in A\and
+    G_a(v(X)) \hva\\
+    \forall i\in I:\ q_i \goesto[p_i]_i q'_i \wedge v_i = F_{a_i}(v(X)) \and
+    \forall i\not\in I:\ q_i = q'_i
+}
+{
+    (q_1,\dots,q_n) \goesto[a] (q'_1,\dots,q'_n)
+}
+\end{mathpar}
+\end{itemize}
+
+
+\onslide<2->
+\begin{block}{Set of all global Run}\tiny
+$R(B)=\{(q_0 \cdot q_1 \cdots q_s)\mid q_0 =Init,\forall i\in [1,s]: q_i\in Q\wedge \exists a\in A, q_{i-1}\stackrel{a}{\longrightarrow}q_i\}$ 
+\end{block}
+
+
+\onslide<3->
+\begin{block}{Set of all global Trace}\tiny
+$Tr(B)=\{(q_0 \cdot a_1 \cdot q_1\cdots a_s \cdot q_s)\mid q_0 =Init,\forall i\in [1,s]: q_i\in Q\wedge  a_i\in A, q_{i-1}\stackrel{a_i}{\longrightarrow}q_i\}$ 
+\end{block}
+
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Composite Component in Partial Semantics}
+  
+\setbeamercovered{transparent}
+  
+$B^\perp= \Gamma^\perp(B_{1}^\perp,...,B_{n}^\perp)$ 
+\begin{itemize} 
+\small
+\item $B_i^\perp=(P_i\cup\{\beta_i\},L_i\cup L_i^\perp ,T^\perp_i,X_i,\{g_{i_\tau}\}_{\tau \in T^\perp_i}, \{f_{i_\tau}\}_{\tau \in T^\perp_i})$ is the partial state model of $B_i$ where :
+\begin{itemize} 
+\scriptsize
+\item $L_i^\perp= \{l^\perp_t\mid t\in T_i\}$ such that $L_i^\perp\cap L_i=\emptyset$
+\item $\beta_i \notin P_i$ is a new port
+\item $T^\perp_i\subseteq(L_i\cup L^\perp_i)\times P_i \cup\{\beta_i\}\times(L_i\cup L^\perp_i)$ such that $T^\perp_i=\{(l,p,l^\perp_t),(l^\perp_t,\beta,l')\mid \exists (l,p,l')\in T_i\}$
+\end{itemize}
+
+\item Semantics of $B_i$ is an LTS $(Q_i\cup Q^\perp_i,P_i\cup\{\beta_i\},\rightsquigarrow_i)$
+\begin{itemize}
+\scriptsize
+\item $Q^\perp_i=\{(l,v)\in L^\perp_i\times \{\perp\}\}$
+\item $\rightsquigarrow_i= \{ ((l,v),p,(l^\perp_t,\perp)),((l^\perp_t,\perp),\beta_i,(l',v'))\mid (l,p,l^\perp_t),(l^\perp_t,\beta_i,l')\in T^\perp_i, (l,v),(l',v')\in Q_i,(l^\perp_t,\perp)\in Q^\perp_i  \wedge\exists \tau\in T_i: g_{i_\tau}(v) \wedge v'=f_{i_\tau}(v)\}$
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+  
+        
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.8cm, semithick]
+  \tikzstyle{every state}=[minimum width=0.6cm,circle,inner sep=0pt,draw=black] 
+ \node [minimum width=0.6cm,circle,inner sep=0pt,draw=black] (A) {$l$};
+ \node [minimum width=0.6cm,circle,inner sep=0pt,draw=black] (B) [below right of =A]       {$l'$};
+ \node [minimum width=0.6cm,circle,inner sep=0pt,draw=black] (C) [right of =A] [node distance=4cm]      {$l$};
+ \node [minimum width=0.6cm,circle,inner sep=0pt,draw=black,fill=blue!20] (D) [below right of =C] [node distance=1.2cm] {$l^\perp_t$}; 
+ \node [minimum width=0.6cm,circle,inner sep=0pt,draw=black] (E) [below right of =D] [node distance=1.2cm]{$l'$};
+  \path (A) edge [above right]        node[text centered] {$p,f$} (B);
+  \path (C) edge [above right]        node[text centered] {$p$ $(Interaction)$} (D);
+  \path (D) edge [above right]        node[text centered] {$\beta,f$ $(Internal\ Computation)$} (E);
+\end{tikzpicture}
+\end{figure}
+
+
+\item $\Gamma^\perp=\Gamma$ 
+
+\end{itemize}
+
+
+
+
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamercovered{transparent}
+\begin{frame}
+  \frametitle{Composite Component in Partial Semantics}
+  \framesubtitle{Semantics}
+  \small
+Semantics of $B^\perp$ is defined as a transition system $(Q^\perp,A^\perp,\rightsquigarrow)$
+
+\begin{itemize}
+\footnotesize
+\item $Q^\perp=\bigotimes_{i=1}^n (Q_i\cup Q_i^\perp)$, $Q\subset Q^\perp$
+\item $A^\perp=A\cup\{{\beta}_i\}_{i=1}^n$, where $\{{\beta}_i\}_{i=1}^n$ is the set of busy transitions
+\item The transition relation $\rightsquigarrow$ can be defined by the following rules  
+\begin{mathpar}
+\scriptsize
+\inferrule*
+{
+  \exists (a=\{p_i\}_{i\in I}) \in A\and
+    G_a(v(X)) \hva\\
+    \forall i\in I:\ q_i \stackrel{p_i}{\rightsquigarrow_i} q'_i \wedge v_i = F_{a_i}(v(X)) \and           
+    \forall i\not\in I:\ q_i = q'_i
+}
+{
+    (q_1,\dots,q_n) \stackrel{a}{\rightsquigarrow} (q'_1,\dots,q'_n)
+}
+\end{mathpar}
+\begin{mathpar}
+\scriptsize
+\inferrule*
+{   q_i\stackrel{\beta_i}{\rightsquigarrow_i}q'_i
+}
+{
+    (q_1,\dots,q_i,\dots,q_n) \stackrel{\beta_i}{\rightsquigarrow} (q_1,\dots,q'_i,\dots,q_n)
+}
+\end{mathpar}
+\end{itemize}
+
+
+
+\onslide<2->
+\begin{block}{Set of all partial Run}\tiny
+$R(B^\perp)=\{(q_0 \cdot q_1 \cdots q_m)\mid q_0 =Init,\forall i\in [1,m]: q_i\in Q^\perp\wedge \exists a\in A^\perp, q_{i-1}\stackrel{a}{\rightsquigarrow}q_i\}$ 
+\end{block}
+
+
+\onslide<3->
+\begin{block}{Set of all partial Trace}\tiny
+$Tr(B^\perp)=\{(q_0 \cdot a_1 \cdot q_1\cdots a_m \cdot q_m)\mid q_0 =Init,\forall i\in [1,m]: q_i\in Q^\perp\wedge  a_i\in A^\perp, q_{i-1}\stackrel{a_i}{\rightsquigarrow}q^p_i\}$ 
+\end{block}
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{}
+ \framesubtitle{}
+\scriptsize
+\begin{definition}[Bisimulation]
+A bisimulation over $B$ and $B^\perp$ is a relation $R\subseteq Q\times Q^\perp$ such that 
+
+\begin{itemize}
+\scriptsize
+\item $\forall(q,r)\in R,\ a\in A : q\stackrel{a}{\rightarrow}q' \Longrightarrow \exists r' : (q',r')\in R \wedge r\stackrel{\beta^*a}{\rightsquigarrow}r'$
+
+\item $\forall(q,r)\in R,\ a\in A : r\stackrel{a}{\rightsquigarrow}r' \Longrightarrow \exists q' : (q',r')\in R \wedge q\stackrel{a}{\rightarrow}q'$
+
+\item $\forall(q,r)\in R,\ \beta\in\{{\beta}_i\}_{i=1}^n: r\stackrel{\beta}{\rightsquigarrow}r' \Longrightarrow  (q,r')\in R $
+\end{itemize}
+We say that $B$ and $B^\perp$ are bisimilar.
+\end{definition}
+
+\begin{theorem}%<1->
+\scriptsize
+Let $B^\perp=\Gamma^\perp(B^\perp_1, \cdots ,B^\perp_n)$ be the corresponding partial state semantic model obtained from $B=\Gamma(B_1, \cdots ,B_n)$. $B$ and $B^\perp$ are bisimilar.
+\end{theorem}
+
+\begin{proof}%<2->
+\tiny 
+
+We define the relation $R'=\{(q,r)\in Q\times Q^\perp\mid r\stackrel{\beta^*}{\rightsquigarrow}q\}$ and prove that R' satisfies all the bisimulation properties.
+
+\end{proof}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{}
+ \framesubtitle{}
+\small
+\begin{definition}[Witness]
+\scriptsize
+Given a bisimulation $R$ between $B$ and $B^\perp$, the witness relation $W\subseteq Tr(B)\times Tr(B^\perp)$ is the smallest set that contains $(Init,Init)$ and satisfies the following rules
+ 
+\begin{itemize}
+\item[] For $(\sigma_1,\sigma_2)\in W$ :
+
+\begin{itemize}
+\scriptsize
+\item $(\sigma_1,\sigma_2\cdot\beta\cdot q_2)\in W$ if $(last(\sigma_1),q_2)\in R$
+\item $(\sigma_1\cdot a\cdot q_1,\sigma_2\cdot a\cdot q_2)\in W$ if $a\in A$ and $(q_1,q_2)\in R$ 
+
+\end{itemize}
+\end{itemize}
+
+If $(\sigma_1,\sigma_2)\in W$, we say that $\sigma_1$ is a witness of $\sigma_2$
+\end{definition}
+\begin{block}{Property}%<2->
+\scriptsize
+\begin{itemize}
+\item For all $(\sigma_1,\sigma_2)\in W$, Sequence of interactions of $\sigma_2$ and its witness trace $\sigma_1$ are equal
+\item For any trace $\sigma_2\in Tr(B^\perp)$ there \underline{exists} an \underline{unique} witness trace $\sigma_1\in Tr(B)$ 
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{}
+ \framesubtitle{}
+
+
+
+\begin{proof}
+\tiny
+%Let us consider a relation between partial trace and global trace of two bisimilar model $B$ and $B^\perp$
+%$W'=\{(\sigma_1,\sigma_2)\mid\sigma_1=(q_0\cdot a_1\cdot q_1 \cdots a_n\cdot q_n)\in Tr(B),\sigma_2=(q'_0\cdot a'_1\cdot q'_1 \cdots a'_m\cdot q'_m)\in Tr(B^\perp)\}$ such that 
+%
+%\begin{itemize}
+%\item[] $q_0=q'_0$
+%\item[] $(a_1\cdot a_2\cdots a_n)=(a'_1\cdot a'_2\cdots a'_m)$ where $\forall i\in[1,m]:$ if $a'_i\in\beta$ then $a'_i=\epsilon$
+%\end{itemize}
+%For the traces with only initial state, witness property is satisfied.\\
+%If the witness properties hold for any $\sigma'_1=(q_0 \cdots a_i\cdot q_i)$ and $\sigma'_2=(q'_0 \cdots a'_j\cdot q'_j)$ such that $(\sigma'_1,\sigma'_2)\in W$ and $(q_i,q'_j)\in R$ then:
+%\begin{itemize}
+%\item[--]  If $a\in A:\sigma_2=\sigma'_2\cdot a \cdot q_{j+1}$ then $\sigma_1=\sigma'_1\cdot a \cdot q_{i+1}\Rightarrow(q_{i+1},q'_{j+1})\in R$
+%\item[--]  If $a\in \beta:\sigma_2=\sigma'_2\cdot a \cdot q'_{j+1}$ from bisimulation $(q_i,q'_{j+1})\in R$
+%\end{itemize}
+
+\end{proof}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Question}
+ \framesubtitle{}
+\begin{mdframed}[backgroundcolor=yellow]
+\center
+How to find the unique witness global trace of a partial trace in online fashion?
+\end{mdframed}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Reconstruction of the global trace from the partial trace}
+ \framesubtitle{}
+ 
+ \begin{definition}[Accumulator function]
+\scriptsize
+$Acc:Tr(B^\perp)\longrightarrow Q\times(A\times Q)^*\times (A\times Q^\perp)^{\leq n}$
+
+
+\begin{tabular}{@{-- }ll}
+  $Acc(Init)=Init$\\
+  $Acc(\sigma\cdot a\cdot q)=Acc(\sigma)\cdot a\cdot q$ &$\text{ for }a\in A$\\
+  $Acc(\sigma\cdot\beta_j\cdot q)=\text{Map } [upd] \ (q,Acc(\sigma)) $&$\text{ for } \beta_j\in \{\beta_i\}^n_{i=1}$, where 
+\end{tabular}\\
+
+let $q=(q''_1,\cdots,q''_n)$ in 
+\begin{itemize}
+\scriptsize
+\item[] $upd:Q^\perp\times(Q^\perp\cup A)\longrightarrow Q^\perp\cup A $
+\begin{itemize}
+\scriptsize
+\item $upd(a)=a$ ,for $a\in A$
+\item $upd\bigg((q_1,\cdots ,q_n)\bigg)=(q'_1,\cdots ,q'_n)$ where, $\forall k\in [1,n]$,\\
+$q'_k=\begin{dcases}
+   q''_k  &\text{ if } (j=k) \wedge (q_k\in Q^\perp_k) \\
+   q_k &\text{ otherwise } \\
+   \end{dcases}$
+
+
+    \end{itemize}
+  
+\end{itemize}
+
+
+\end{definition}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Reconstruction of the global trace from the partial trace}
+ \framesubtitle{}
+ 
+ \begin{definition}[Discriminant function]
+\scriptsize
+
+$\mathcal{D}=Q\times(A\times Q)^*\times (A\times Q^\perp)^{\leq n}\longrightarrow Tr(B)$
+\begin{itemize}
+\scriptsize
+\item[--] $\mathcal{D}(Init)=Init$
+\item[--] $\mathcal{D}((Acc(\sigma)\cdot a \cdot q)=\begin{dcases}   
+   \mathcal{D}(Acc(\sigma))\cdot a  &\text{ if } (a \in A) \wedge (q\notin Q)\\
+   \mathcal{D}(Acc(\sigma))\cdot q  &\text{ if } (a \notin A) \wedge (q\in Q)\\
+   \mathcal{D}(Acc(\sigma)) &\text{ if } (a \notin A) \wedge (q\notin Q)\\
+   n/a^*  &\text{ otherwise } \\
+   \end{dcases}$\\
+\tiny   
+* : The next state after an intercation is always a partial state, therefore $(a\in A)\wedge (q\in Q)$ never occurs
+\end{itemize}
+
+\end{definition}
+
+
+\end{frame}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{}
+\framesubtitle{}
+
+\begin{theorem}
+\scriptsize
+$\forall \sigma\in Tr(B^\perp): (\mathcal{D}(Acc(\sigma)),\sigma)\in W$
+\end{theorem}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+\end{document}

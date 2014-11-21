@@ -1,0 +1,22 @@
+% Color template for Carleton student presentations
+% Author: Andrew Gainer-Dewar, 2013
+% This work is licensed under the Creative Commons Attribution 4.0 International License.
+% To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, 444 Castro Street, Suite 900, Mountain View, California, 94041, USA.
+\ProvidesPackage{beamercolorthemecarl}[2013/12/17 beamer 'carl' color theme]
+
+\mode<presentation>
+
+% Official Carleton colors
+\definecolor{carlblue}{RGB}{0,39,118}
+\definecolor{carlmaize}{RGB}{252,212,80}
+
+% The base color should be the Carleton blue, because it's quite pretty
+\setbeamercolor{structure}{fg=carlblue,bg=carlblue}
+
+% Example blocks use the Carleton maize
+\setbeamercolor{example text}{fg=carlblue,bg=carlmaize}
+\setbeamercolor{block title example}{use=example text,fg=example text.fg,bg=example text.bg!20!bg}
+
+% And everything else is inherited from Dolphin
+
+\mode<all>
